@@ -196,9 +196,44 @@ Base path: `/api` (or versioned `/api/v1`). Interactive Swagger UI documentation
 
 ---
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+### 🚀 1-Click Launch with Docker Compose (Recommended)
+
+To run the entire platform (PostgreSQL database, Spring Boot backend, and React 19 frontend with Nginx reverse proxy) in containers:
+
+```bash
+# Clone repository
+git clone https://github.com/Shubhrang-Sinha/rumaal.git
+cd rumaal
+
+# (Optional) Copy environment template
+cp .env.example .env
+
+# Start all services
+docker compose up --build
+```
+
+Services will be accessible at:
+- **Frontend SPA**: [http://localhost:5173](http://localhost:5173)
+- **Backend API & Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- **Actuator Health Check**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
+- **PostgreSQL DB**: `localhost:5432` (`BMS`)
+
+To run in the background or stop:
+```bash
+# Run detached in background
+docker compose up --build -d
+
+# Stop all services and containers
+docker compose down
+```
+
+---
+
+### Manual / Local Development Setup
+
+#### Prerequisites
 - **Java**: OpenJDK 21 or higher
 - **Build Tool**: Apache Maven 3.9+ (or included `./mvnw`)
 - **Database**: PostgreSQL 15+ (or Docker)
