@@ -21,8 +21,9 @@ public class MovieController {
     private final MovieService movieService;
 
     @GetMapping
-    @Operation(summary = "Get all movies (paginated)")
-    public ResponseEntity<Page<Movie>> getAllMovies(@PageableDefault(size = 20) Pageable pageable) {
+    @Operation(summary = "Get all movies (paginated, sorted by newest release date)")
+    public ResponseEntity<Page<Movie>> getAllMovies(
+            @PageableDefault(size = 50, sort = "releaseDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(movieService.getAllMovies(pageable));
     }
 

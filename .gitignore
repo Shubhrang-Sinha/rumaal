@@ -34,3 +34,13 @@ build/
 
 # Planning
 .planning/
+
+# Environment & Secret files (Never commit to git!)
+.env
+.env.*
+!.env.example
+application-secrets.properties
+application-local.properties
+*secret*
+*.local.properties
+*.local

@@ -1,7 +1,12 @@
 import React from 'react';
 import { Search, ChevronRight, Play } from 'lucide-react';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  searchTerm?: string;
+  onSearchChange?: (val: string) => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ searchTerm = '', onSearchChange }) => {
   return (
     <section style={{
       minHeight: '85vh',
@@ -64,7 +69,9 @@ const Hero: React.FC = () => {
               <Search color="var(--text-muted)" size={20} />
               <input 
                 type="text" 
-                placeholder="Search movies, events, theaters..."
+                value={searchTerm}
+                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                placeholder="Search movies by title (e.g. Ramayana, Godzilla, Pushpa)..."
                 style={{
                   background: 'none',
                   border: 'none',
@@ -76,8 +83,15 @@ const Hero: React.FC = () => {
                 }}
               />
             </div>
-            <button className="btn-primary" style={{ padding: '1rem 2rem', borderRadius: '18px' }}>
-              Search Now
+            <button 
+              onClick={() => {
+                const el = document.getElementById('now-showing-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="btn-primary" 
+              style={{ padding: '1rem 2rem', borderRadius: '18px' }}
+            >
+              Browse Now
               <ChevronRight size={20} />
             </button>
           </div>

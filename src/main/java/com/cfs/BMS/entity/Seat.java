@@ -2,11 +2,13 @@ package com.cfs.BMS.entity;
 
 
 import com.cfs.BMS.enums.SeatType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "seats")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Getter
 @Setter
 @NoArgsConstructor

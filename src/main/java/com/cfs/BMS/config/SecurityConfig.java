@@ -31,15 +31,24 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // public reads
-                        .requestMatchers(HttpMethod.GET, "/api/**/movies/**", "/api/**/cities/**",
-                                "/api/**/theaters/**", "/api/**/shows/**", "/api/**/screens/**",
-                                "/api/**/seats/**").permitAll()
-                        .requestMatchers("/api/**/users/register", "/api/**/users/login",
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/movies", "/api/movies/**", "/api/v1/movies", "/api/v1/movies/**",
+                                "/api/cities", "/api/cities/**", "/api/v1/cities", "/api/v1/cities/**",
+                                "/api/theaters", "/api/theaters/**", "/api/v1/theaters", "/api/v1/theaters/**",
+                                "/api/shows", "/api/shows/**", "/api/v1/shows", "/api/v1/shows/**",
+                                "/api/screens", "/api/screens/**", "/api/v1/screens", "/api/v1/screens/**",
+                                "/api/seats", "/api/seats/**", "/api/v1/seats", "/api/v1/seats/**").permitAll()
+                        .requestMatchers(
+                                "/api/users/register", "/api/v1/users/register",
+                                "/api/users/login", "/api/v1/users/login",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/actuator/health", "/actuator/info").permitAll()
-                        // bookings require auth; POST holds + creates
-                        .requestMatchers(HttpMethod.POST, "/api/**/bookings/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/**/bookings/**").authenticated()
+                        // Public seat availability before broader matchers
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/show/*/available-seats", "/api/v1/bookings/show/*/available-seats").permitAll()
+                        // POST sync-tmdb requires authentication
+                        .requestMatchers(HttpMethod.POST, "/api/movies/sync-tmdb", "/api/v1/movies/sync-tmdb").authenticated()
+                        // All booking actions require authentication
+                        .requestMatchers("/api/bookings/**", "/api/v1/bookings/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

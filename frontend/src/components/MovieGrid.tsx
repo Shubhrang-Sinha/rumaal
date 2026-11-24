@@ -17,15 +17,28 @@ const MovieGrid: React.FC<MovieGridProps> = ({ title, movies }) => {
         </button>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-        gap: '2.5rem'
-      }}>
-        {movies.map(movie => (
-          <MovieCard key={movie.id} movie={movie} />
-        ))}
-      </div>
+      {movies.length === 0 ? (
+        <div className="glass-effect" style={{
+          textAlign: 'center',
+          padding: '4rem 2rem',
+          borderRadius: '24px',
+          color: 'var(--text-muted)',
+          border: '1px solid var(--glass-border)'
+        }}>
+          <h3 style={{ fontSize: '1.4rem', color: 'white', marginBottom: '0.5rem' }}>No movies found matching your filters</h3>
+          <p style={{ fontSize: '0.95rem' }}>Try clearing your search query or choosing another language or genre.</p>
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+          gap: '2.5rem'
+        }}>
+          {movies.map(movie => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
+      )}
     </section>
   );
 };

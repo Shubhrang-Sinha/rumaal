@@ -52,6 +52,11 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email.toLowerCase().trim())
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+    }
+
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }

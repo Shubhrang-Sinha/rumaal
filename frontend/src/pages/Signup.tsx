@@ -1,10 +1,48 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, User, Phone, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const Signup: React.FC = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
+      setError('Please fill in all required fields');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      const result = await register(name, email, password, phone);
+      if (result?.autoLoginFailed) {
+        navigate('/login', { state: { message: 'Account registered successfully! Please sign in with your credentials.' } });
+      } else {
+        navigate('/');
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || 'Registration failed. Email might already exist.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
@@ -29,14 +67,35 @@ const Signup: React.FC = () => {
             <p style={{ color: 'var(--text-muted)' }}>Join thousands of cinema lovers today</p>
           </div>
 
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {error && (
+            <div style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '16px',
+              padding: '1rem',
+              color: '#f87171',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              marginBottom: '1.5rem'
+            }}>
+              <AlertCircle size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Full Name</label>
+              <label style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Full Name *</label>
               <div style={{ position: 'relative' }}>
                 <User size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                   type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe" 
+                  required
                   style={{ 
                     width: '100%', 
                     padding: '1rem 1rem 1rem 3.5rem', 
@@ -54,12 +113,15 @@ const Signup: React.FC = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Email Address</label>
+              <label style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Email Address *</label>
               <div style={{ position: 'relative' }}>
                 <Mail size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com" 
+                  required
                   style={{ 
                     width: '100%', 
                     padding: '1rem 1rem 1rem 3.5rem', 
@@ -77,12 +139,14 @@ const Signup: React.FC = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Password</label>
+              <label style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Phone Number</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <Phone size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
-                  type="password" 
-                  placeholder="••••••••" 
+                  type="tel" 
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 9876543210" 
                   style={{ 
                     width: '100%', 
                     padding: '1rem 1rem 1rem 3.5rem', 
@@ -99,42 +163,61 @@ const Signup: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', marginLeft: '0.5rem' }}>
-              <input type="checkbox" id="terms" style={{ accentColor: 'var(--primary)', width: '18px', height: '18px' }} />
-              <label htmlFor="terms" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                I agree to the <Link to="/" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Terms of Service</Link> and <Link to="/" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Privacy Policy</Link>
-              </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <label style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Password *</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={18} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters" 
+                  required
+                  style={{ 
+                    width: '100%', 
+                    padding: '1rem 1rem 1rem 3.5rem', 
+                    background: 'rgba(255, 255, 255, 0.03)', 
+                    border: '1px solid var(--glass-border)', 
+                    borderRadius: '16px', 
+                    color: 'white',
+                    outline: 'none',
+                    transition: 'var(--transition)'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+                  onBlur={(e) => e.target.style.borderColor = 'var(--glass-border)'}
+                />
+              </div>
             </div>
 
-            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem', borderRadius: '16px', justifyContent: 'center' }}>
-              Create Account
-              <ArrowRight size={18} />
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn-primary" 
+              style={{ width: '100%', marginTop: '1rem', borderRadius: '16px', justifyContent: 'center' }}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  Create Account
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
           </form>
 
-          <div style={{ margin: '2rem 0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>OR SIGN UP WITH</span>
-            <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button className="btn-glass" style={{ flex: 1, borderRadius: '16px', padding: '0.75rem' }}>
-              <User size={18} />
-              GitHub
-            </button>
-            <button className="btn-glass" style={{ flex: 1, borderRadius: '16px', padding: '0.75rem' }}>
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18" alt="Google" />
-              Google
-            </button>
-          </div>
-
-          <p style={{ textAlign: 'center', marginTop: '2.5rem', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            Already have an account? <Link to="/login" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
+          <p style={{ marginTop: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+              Sign In
+            </Link>
           </p>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );

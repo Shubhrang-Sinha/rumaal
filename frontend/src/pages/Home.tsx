@@ -4,38 +4,172 @@ import Hero from '../components/Hero';
 import MovieGrid from '../components/MovieGrid';
 import Footer from '../components/Footer';
 import { MovieAPI } from '../services/api';
-import { Shield, Zap, Heart } from 'lucide-react';
+import { Shield, Zap, Heart, X } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [movies, setMovies] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('All');
+  const [selectedGenre, setSelectedGenre] = useState('All');
+
+  const fetchMovies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await MovieAPI.getAll();
+      if (Array.isArray(data)) {
+        setMovies(data);
+      } else {
+        setMovies([]);
+      }
+    } catch (err: any) {
+      console.error('Error fetching movies:', err);
+      setError('Failed to load movies. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const data = await MovieAPI.getAll();
-        setMovies(data);
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-        // Fallback mock data if backend is not running
-        setMovies([
-          { id: 1, title: 'Pushpa 2: The Rule', genre: 'Action/Thriller', rating: 9.2, language: 'Telugu', posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2670&auto=format&fit=crop' },
-          { id: 2, title: 'Kalki 2898 AD', genre: 'Sci-Fi/Action', rating: 8.9, language: 'Hindi', posterUrl: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2670&auto=format&fit=crop' },
-          { id: 3, title: 'Leo', genre: 'Action/Crime', rating: 8.7, language: 'Tamil', posterUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2670&auto=format&fit=crop' },
-          { id: 4, title: 'Dune: Part Two', genre: 'Sci-Fi/Drama', rating: 9.0, language: 'English', posterUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2672&auto=format&fit=crop' },
-        ]);
-      }
-    };
-
     fetchMovies();
   }, []);
+
+  const availableLanguages = ['All', 'Hindi', 'English', 'Telugu', 'Tamil', 'Japanese', 'Korean'];
+  const commonGenres = ['All', 'Action', 'Comedy', 'Sci-Fi', 'Thriller', 'Drama', 'Animation', 'Fantasy', 'Horror'];
+
+  const filteredMovies = movies.filter((m) => {
+    const matchesSearch = !searchTerm || m.title?.toLowerCase().includes(searchTerm.toLowerCase().trim());
+    const matchesLang = selectedLanguage === 'All' || 
+      m.language?.toLowerCase().trim() === selectedLanguage.toLowerCase().trim();
+    const matchesGenre = selectedGenre === 'All' || (
+      m.genre && m.genre.split(/[\/,]/).map((g: string) => g.trim().toLowerCase()).includes(selectedGenre.toLowerCase().trim())
+    );
+    return matchesSearch && matchesLang && matchesGenre;
+  });
+
+  const resetFilters = () => {
+    setSearchTerm('');
+    setSelectedLanguage('All');
+    setSelectedGenre('All');
+  };
 
   return (
     <main>
       <Navbar />
-      <Hero />
+      <Hero searchTerm={searchTerm} onSearchChange={setSearchTerm} />
       
-      <div style={{ marginTop: '-4rem', position: 'relative', zIndex: 10 }}>
-        <MovieGrid title="Now Showing" movies={movies} />
+      <div id="now-showing-section" style={{ marginTop: '-4rem', position: 'relative', zIndex: 10 }}>
+        {/* Dynamic Filter Controls */}
+        <div className="container" style={{ marginBottom: '1.5rem' }}>
+          <div className="glass-effect" style={{
+            padding: '1.25rem 1.75rem',
+            borderRadius: '20px',
+            background: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid var(--glass-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            {/* Language filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', minWidth: '75px' }}>
+                Language:
+              </span>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {availableLanguages.map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setSelectedLanguage(lang)}
+                    style={{
+                      padding: '0.35rem 0.85rem',
+                      borderRadius: '100px',
+                      fontSize: '0.85rem',
+                      fontWeight: selectedLanguage === lang ? 700 : 500,
+                      background: selectedLanguage === lang ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
+                      border: '1px solid ' + (selectedLanguage === lang ? 'var(--primary)' : 'var(--glass-border)'),
+                      cursor: 'pointer',
+                      transition: 'var(--transition)'
+                    }}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Genre filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', minWidth: '75px' }}>
+                Genre:
+              </span>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {commonGenres.map((genre) => (
+                  <button
+                    key={genre}
+                    onClick={() => setSelectedGenre(genre)}
+                    style={{
+                      padding: '0.35rem 0.85rem',
+                      borderRadius: '100px',
+                      fontSize: '0.85rem',
+                      fontWeight: selectedGenre === genre ? 700 : 500,
+                      background: selectedGenre === genre ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
+                      border: '1px solid ' + (selectedGenre === genre ? 'var(--primary)' : 'var(--glass-border)'),
+                      cursor: 'pointer',
+                      transition: 'var(--transition)'
+                    }}
+                  >
+                    {genre}
+                  </button>
+                ))}
+              </div>
+
+              {(selectedLanguage !== 'All' || selectedGenre !== 'All' || searchTerm) && (
+                <button
+                  onClick={resetFilters}
+                  style={{
+                    marginLeft: 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    background: 'none',
+                    border: 'none',
+                    color: '#f87171',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <X size={14} /> Clear Filters
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 0' }}>
+            <div style={{ width: '40px', height: '40px', border: '4px solid var(--primary-muted)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '1rem' }}></div>
+            <p style={{ color: 'var(--text-muted)' }}>Loading latest movies...</p>
+          </div>
+        ) : error ? (
+          <div className="container" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+            <div className="glass-effect" style={{ maxWidth: '500px', margin: '0 auto', padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+              <p style={{ color: '#f87171', fontSize: '1.1rem', marginBottom: '1.5rem' }}>{error}</p>
+              <button onClick={fetchMovies} className="btn-primary" style={{ padding: '0.75rem 1.75rem', borderRadius: '12px' }}>
+                Retry Loading Movies
+              </button>
+            </div>
+          </div>
+        ) : (
+          <MovieGrid 
+            title={searchTerm ? `Search Results for "${searchTerm}" (${filteredMovies.length})` : `Now Showing in Cinemas (${filteredMovies.length})`} 
+            movies={filteredMovies} 
+          />
+        )}
       </div>
       
       {/* Value Proposition */}

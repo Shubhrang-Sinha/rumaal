@@ -29,4 +29,7 @@ public class Movie {
     private LocalDate releaseDate;
     private String posterUrl;
 
+    @Column(name = "tmdb_id", unique = true)
+    private Long tmdbId;
+
 }

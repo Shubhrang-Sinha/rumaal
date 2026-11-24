@@ -3,6 +3,7 @@ package com.cfs.BMS.entity;
 
 import com.cfs.BMS.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", indexes = @Index(name = "idx_users_email", columnList = "email", unique = true))
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder

@@ -30,6 +30,11 @@ public class GlobalExceptionHandler {
         return problem(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        return problem(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ProblemDetail handleNotFound(NotFoundException ex) {
         return problem(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -46,6 +51,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleBadRequest(IllegalArgumentException ex) {
         return problem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ProblemDetail handleNoResource(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        return problem(HttpStatus.NOT_FOUND, "Resource not found: " + ex.getResourcePath());
     }
 
     @ExceptionHandler(Exception.class)
