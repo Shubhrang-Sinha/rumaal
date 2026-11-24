@@ -20,10 +20,10 @@ const Footer: React.FC = () => {
           {/* Brand */}
           <div>
             <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-1.5px', marginBottom: '1.5rem' }}>
-              BOOK<span style={{ color: 'var(--primary)' }}>MY</span>SHOW
+              RUM<span style={{ color: 'var(--primary)' }}>AAL</span>
             </div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-              The world's leading entertainment destination. Discover the best movies, events, and experiences in your city.
+              Reserve your cinema seats before anyone else. Real-time theatrical releases, instant ticketing, and concurrency-safe bookings.
             </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
               {[MessageCircle, Send, Camera, Play].map((Icon, i) => (
@@ -63,15 +63,15 @@ const Footer: React.FC = () => {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <li style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
                 <Mail size={20} className="text-primary" />
-                <span>support@bookmyshow.com</span>
+                <span>support@rumaal.app</span>
               </li>
               <li style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
                 <Phone size={20} className="text-primary" />
-                <span>+1 (800) SHOW-TIME</span>
+                <span>+91 (800) 786-225</span>
               </li>
               <li style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
                 <MapPin size={20} className="text-primary" />
-                <span>Entertainment Ave, Hollywood, CA</span>
+                <span>Cinema Central, Mumbai, India</span>
               </li>
             </ul>
           </div>
@@ -84,7 +84,7 @@ const Footer: React.FC = () => {
           color: 'var(--text-muted)',
           fontSize: '0.9rem'
         }}>
-          <p>© 2026 BookMyShow Clone. Designed with passion for cinema lovers.</p>
+          <p>© 2026 Rumaal. Claim your seat with confidence.</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem' }}>
             <Link to="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Privacy Policy</Link>
             <Link to="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Terms of Service</Link>

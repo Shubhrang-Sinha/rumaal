@@ -57,7 +57,7 @@ const Navbar: React.FC = () => {
             display: 'flex',
             alignItems: 'center'
           }}>
-            BOOK<span style={{ color: 'var(--primary)' }}>MY</span>SHOW
+            RUM<span style={{ color: 'var(--primary)' }}>AAL</span>
           </Link>
 
           {/* City Selector Dropdown */}

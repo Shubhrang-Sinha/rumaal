@@ -1,6 +1,6 @@
-# 🎨 BookMyShow Frontend - Premium React Application
+# 🎨 Rumaal Frontend - Modern React 19 Application
 
-This directory contains the high-end, React-powered frontend for the BookMyShow clone. Built with a focus on visual excellence and smooth user interactions.
+This directory contains the cinematic, React-powered frontend for **Rumaal** (रूमाल). Built with a focus on visual excellence, glassmorphism aesthetics, and real-time concurrency-safe booking flows.
 
 ## 🚀 Quick Start
 

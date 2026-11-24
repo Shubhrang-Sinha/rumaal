@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     private ProblemDetail problem(HttpStatus status, String detail) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, detail);
-        pd.setType(URI.create("https://bookmyshow.local/problems/" + status.value()));
+        pd.setType(URI.create("https://rumaal.app/problems/" + status.value()));
         pd.setProperty("timestamp", Instant.now().toString());
         return pd;
     }
