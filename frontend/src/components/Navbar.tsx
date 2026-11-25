@@ -42,12 +42,15 @@ const Navbar: React.FC = () => {
       padding: '0.75rem 0',
       borderBottom: '1px solid var(--glass-border)'
     }}>
-      <div className="container" style={{
+      <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: '0 1.5rem',
+        width: '100%',
+        boxSizing: 'border-box'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <Link to="/" style={{ 
             textDecoration: 'none',
             display: 'flex',
