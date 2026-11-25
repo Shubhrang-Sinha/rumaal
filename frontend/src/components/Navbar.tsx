@@ -49,15 +49,20 @@ const Navbar: React.FC = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <Link to="/" style={{ 
-            fontSize: '1.75rem', 
-            fontWeight: 900, 
-            color: 'var(--text-main)', 
-            letterSpacing: '-1.5px',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center'
           }}>
-            RUM<span style={{ color: 'var(--primary)' }}>AAL</span>
+            <img 
+              src="/rumaal-logo.png" 
+              alt="Rumaal" 
+              style={{
+                height: '54px',
+                width: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))'
+              }}
+            />
           </Link>
 
           {/* City Selector Dropdown */}

@@ -19,8 +19,16 @@ const Footer: React.FC = () => {
         }}>
           {/* Brand */}
           <div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-1.5px', marginBottom: '1.5rem' }}>
-              RUM<span style={{ color: 'var(--primary)' }}>AAL</span>
+            <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+              <img 
+                src="/rumaal-logo.png" 
+                alt="Rumaal" 
+                style={{
+                  height: '50px',
+                  width: 'auto',
+                  objectFit: 'contain'
+                }}
+              />
             </div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
               Reserve your cinema seats before anyone else. Real-time theatrical releases, instant ticketing, and concurrency-safe bookings.
