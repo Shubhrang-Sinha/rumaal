@@ -103,22 +103,24 @@ public class TmdbService {
         
         String url;
         RestClient.RequestHeadersSpec<?> requestSpec;
-        var requestFactory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(java.time.Duration.ofSeconds(10));
+        var requestFactory = new org.springframework.http.client.JdkClientHttpRequestFactory();
         requestFactory.setReadTimeout(java.time.Duration.ofSeconds(15));
         RestClient restClient = RestClient.builder().requestFactory(requestFactory).build();
 
+        String userAgent = "Rumaal/1.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)";
         if (isBearerToken) {
             url = String.format("https://api.themoviedb.org/3/movie/now_playing?region=%s&language=en-US&page=1", targetRegion);
             requestSpec = restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + key)
-                    .header("Accept", "application/json");
+                    .header("Accept", "application/json")
+                    .header("User-Agent", userAgent);
         } else {
             url = String.format("https://api.themoviedb.org/3/movie/now_playing?api_key=%s&region=%s&language=en-US&page=1", key, targetRegion);
             requestSpec = restClient.get()
                     .uri(url)
-                    .header("Accept", "application/json");
+                    .header("Accept", "application/json")
+                    .header("User-Agent", userAgent);
         }
 
         log.info("Fetching now-playing movies from TMDB for region: {} (Auth mode: {})", 

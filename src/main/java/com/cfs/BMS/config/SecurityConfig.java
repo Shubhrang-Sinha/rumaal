@@ -45,8 +45,8 @@ public class SecurityConfig {
                                 "/actuator/health", "/actuator/info").permitAll()
                         // Public seat availability before broader matchers
                         .requestMatchers(HttpMethod.GET, "/api/bookings/show/*/available-seats", "/api/v1/bookings/show/*/available-seats").permitAll()
-                        // POST sync-tmdb requires authentication
-                        .requestMatchers(HttpMethod.POST, "/api/movies/sync-tmdb", "/api/v1/movies/sync-tmdb").authenticated()
+                        // TMDB live sync endpoint is accessible
+                        .requestMatchers(HttpMethod.POST, "/api/movies/sync-tmdb", "/api/v1/movies/sync-tmdb").permitAll()
                         // All booking actions require authentication
                         .requestMatchers("/api/bookings/**", "/api/v1/bookings/**").authenticated()
                         .anyRequest().permitAll()
