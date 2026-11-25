@@ -51,48 +51,72 @@ INSERT INTO theaters (name, address, city_id) VALUES
 ('AMB Cinemas', 'Gachibowli, Hyderabad', 4),
 ('Sathyam Cinemas', 'Royapettah, Chennai', 5);
 
--- 5. Screens
-INSERT INTO screens (name, total_seats, theater_id) VALUES 
-('IMAX Laser 1', 25, 1),
-('Dolby Atmos Audi 2', 25, 1),
-('Gold Class Audi 1', 25, 2),
-('Screen 1 Superplex', 25, 4),
-('Insignia VIP Screen', 25, 3);
+-- 5. Screens (All Major Theaters Across Mumbai, Delhi, Bangalore, Hyderabad, Chennai)
+INSERT INTO screens (id, name, total_seats, theater_id) VALUES 
+(1, 'IMAX Laser 1', 25, 1),
+(2, 'Dolby Atmos Audi 2', 25, 1),
+(3, 'Gold Class Audi 1', 25, 2),
+(4, 'Screen 1 Superplex', 25, 4),
+(5, 'Insignia VIP Screen', 25, 3),
+(6, 'PXL Audi 2', 25, 2),
+(7, 'IMAX Laser Audi 2', 25, 3),
+(8, 'Screen 2 Superplex', 25, 4),
+(9, 'Main Screen - RDX', 25, 5),
+(10, 'Studio 5 Luxury', 25, 5)
+ON CONFLICT (id) DO NOTHING;
 
 -- 6. Interactive Seat Layout (25 seats per screen: 10 Regular, 10 Premium, 5 VIP)
 INSERT INTO seats (seat_number, seat_row, seat_col, seat_type, screen_id)
 SELECT 'A' || col, 'A', col, 'REGULAR', s.id
 FROM screens s, generate_series(1, 10) as col
+WHERE NOT EXISTS (SELECT 1 FROM seats se WHERE se.screen_id = s.id AND se.seat_number = 'A' || col)
 UNION ALL
 SELECT 'B' || col, 'B', col, 'PREMIUM', s.id
 FROM screens s, generate_series(1, 10) as col
+WHERE NOT EXISTS (SELECT 1 FROM seats se WHERE se.screen_id = s.id AND se.seat_number = 'B' || col)
 UNION ALL
 SELECT 'C' || col, 'C', col, 'VIP', s.id
-FROM screens s, generate_series(1, 5) as col;
+FROM screens s, generate_series(1, 5) as col
+WHERE NOT EXISTS (SELECT 1 FROM seats se WHERE se.screen_id = s.id AND se.seat_number = 'C' || col);
 
--- 7. Shows for Current and Upcoming Dates
+-- 7. Shows for Current and Upcoming 7 Dates across All Movies
 INSERT INTO shows (movie_id, screen_id, show_date, start_time, end_time, ticket_price)
 SELECT 
   m.id,
-  ((m.id % 5) + 1) AS screen_id,
+  CASE t
+    WHEN 1 THEN (((m.id + d) % 10) + 1)
+    WHEN 2 THEN (((m.id + d + 3) % 10) + 1)
+    WHEN 3 THEN (((m.id + d) % 10) + 1)
+    ELSE (((m.id + d + 3) % 10) + 1)
+  END AS screen_id,
   CURRENT_DATE + d AS show_date,
   CASE t 
-    WHEN 1 THEN '10:00:00'::TIME
+    WHEN 1 THEN '10:30:00'::TIME
     WHEN 2 THEN '14:00:00'::TIME
-    WHEN 3 THEN '18:00:00'::TIME
-    ELSE '21:30:00'::TIME
+    WHEN 3 THEN '17:30:00'::TIME
+    ELSE '21:00:00'::TIME
   END AS start_time,
   CASE t 
-    WHEN 1 THEN '12:30:00'::TIME
+    WHEN 1 THEN '13:00:00'::TIME
     WHEN 2 THEN '16:30:00'::TIME
-    WHEN 3 THEN '20:30:00'::TIME
-    ELSE '23:59:00'::TIME
+    WHEN 3 THEN '20:00:00'::TIME
+    ELSE '23:30:00'::TIME
   END AS end_time,
-  250.00 + (t * 50.00) AS ticket_price
+  250.00 + (t * 40.00) AS ticket_price
 FROM movies m
-CROSS JOIN generate_series(0, 3) AS d
+CROSS JOIN generate_series(0, 6) AS d
 CROSS JOIN generate_series(1, 4) AS t
-WHERE m.id <= 20;
+WHERE NOT EXISTS (
+  SELECT 1 FROM shows ex 
+  WHERE ex.movie_id = m.id 
+    AND ex.show_date = CURRENT_DATE + d 
+    AND ex.start_time = CASE t 
+      WHEN 1 THEN '10:30:00'::TIME
+      WHEN 2 THEN '14:00:00'::TIME
+      WHEN 3 THEN '17:30:00'::TIME
+      ELSE '21:00:00'::TIME
+    END
+);
 
 -- 8. Concurrency Inventory: Populate show_seats for all newly created shows
 INSERT INTO show_seats (show_id, seat_id, status)

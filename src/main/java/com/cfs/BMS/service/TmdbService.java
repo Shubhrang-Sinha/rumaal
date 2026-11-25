@@ -77,6 +77,12 @@ public class TmdbService {
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     @Transactional
     public void onStartupSync() {
+        try {
+            ensureShowsForAllMovies();
+        } catch (Exception e) {
+            log.warn("Ensure shows on startup encountered an issue: {}", e.getMessage());
+        }
+
         if (isConfigured()) {
             log.info("Auto-syncing live theatrical movies from TMDB on startup...");
             try {
@@ -232,33 +238,30 @@ public class TmdbService {
             movie = movieRepository.save(movie);
             syncedTitles.add(movie.getTitle());
 
-            // Ensure shows exist for this movie for the next 3 days without slot collisions
+            // Ensure shows exist for this movie for the next 7 days
             LocalDate today = LocalDate.now();
-            for (int day = 0; day <= 3; day++) {
+            for (int day = 0; day < 7; day++) {
                 LocalDate showDate = today.plusDays(day);
-                Screen assignedScreen = screens.get(Math.abs((movie.getId().intValue() + day) % screens.size()));
-                List<Show> existingShowsOnScreen = showRepository.findByScreenIdAndShowDate(assignedScreen.getId(), showDate);
+                List<Show> existingShows = showRepository.findByMovieIdAndShowDate(movie.getId(), showDate);
 
-                for (LocalTime time : standardShowTimes) {
-                    LocalTime endTime = time.plusHours(2).plusMinutes(30);
-                    // Check if slot overlaps with ANY existing show on this screen
-                    boolean overlaps = existingShowsOnScreen.stream().anyMatch(s -> {
-                        LocalTime sStart = s.getStartTime();
-                        LocalTime sEnd = s.getEndTime();
-                        return time.isBefore(sEnd) && endTime.isAfter(sStart);
-                    });
+                if (existingShows.isEmpty()) {
+                    Screen screen1 = screens.get(Math.abs((movie.getId().intValue() + day) % screens.size()));
+                    Screen screen2 = screens.get(Math.abs((movie.getId().intValue() + day + 3) % screens.size()));
 
-                    if (!overlaps) {
+                    for (int t = 0; t < standardShowTimes.length; t++) {
+                        LocalTime time = standardShowTimes[t];
+                        LocalTime endTime = time.plusHours(2).plusMinutes(30);
+                        Screen assignedScreen = (t % 2 == 0) ? screen1 : screen2;
+
                         Show newShow = Show.builder()
                                 .movie(movie)
                                 .screen(assignedScreen)
                                 .showDate(showDate)
                                 .startTime(time)
                                 .endTime(endTime)
-                                .ticketPrice(250.0 + (assignedScreen.getId() * 40))
+                                .ticketPrice(250.0 + ((t + 1) * 40.0))
                                 .build();
-                        newShow = showRepository.save(newShow);
-                        existingShowsOnScreen.add(newShow);
+                        showRepository.save(newShow);
                     }
                 }
             }
@@ -282,5 +285,60 @@ public class TmdbService {
         result.put("movies", syncedTitles);
         result.put("message", "Successfully synced page 1 with " + syncedTitles.size() + " now-playing movies from TMDB!");
         return result;
+    }
+
+    @Transactional
+    public void ensureShowsForAllMovies() {
+        List<Movie> allMovies = movieRepository.findAll();
+        List<Screen> screens = screenRepository.findAll();
+        if (screens.isEmpty() || allMovies.isEmpty()) return;
+
+        LocalDate today = LocalDate.now();
+        LocalTime[] standardShowTimes = new LocalTime[]{
+                LocalTime.of(10, 30),
+                LocalTime.of(14, 0),
+                LocalTime.of(17, 30),
+                LocalTime.of(21, 0)
+        };
+
+        boolean addedAny = false;
+        for (Movie movie : allMovies) {
+            for (int day = 0; day < 7; day++) {
+                LocalDate showDate = today.plusDays(day);
+                List<Show> existing = showRepository.findByMovieIdAndShowDate(movie.getId(), showDate);
+                if (existing.isEmpty()) {
+                    Screen screen1 = screens.get(Math.abs((movie.getId().intValue() + day) % screens.size()));
+                    Screen screen2 = screens.get(Math.abs((movie.getId().intValue() + day + 3) % screens.size()));
+
+                    for (int t = 0; t < standardShowTimes.length; t++) {
+                        LocalTime time = standardShowTimes[t];
+                        LocalTime endTime = time.plusHours(2).plusMinutes(30);
+                        Screen assignedScreen = (t % 2 == 0) ? screen1 : screen2;
+
+                        Show newShow = Show.builder()
+                                .movie(movie)
+                                .screen(assignedScreen)
+                                .showDate(showDate)
+                                .startTime(time)
+                                .endTime(endTime)
+                                .ticketPrice(250.0 + ((t + 1) * 40.0))
+                                .build();
+                        showRepository.save(newShow);
+                        addedAny = true;
+                    }
+                }
+            }
+        }
+
+        if (addedAny) {
+            jdbcTemplate.update("""
+                INSERT INTO show_seats (show_id, seat_id, status)
+                SELECT sh.id, se.id, 'AVAILABLE'
+                FROM shows sh
+                JOIN seats se ON sh.screen_id = se.screen_id
+                ON CONFLICT (show_id, seat_id) DO NOTHING;
+            """);
+            log.info("Ensured upcoming showtimes and seat inventory for all movies.");
+        }
     }
 }
